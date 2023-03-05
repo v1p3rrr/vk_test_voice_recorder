@@ -1,27 +1,22 @@
 package com.vpr.vk_test_voice_recorder.utils
 
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object UtilsModule {
 
     @Provides
-    fun provideDateTimeFormatter(): DateTimeFormatter {
-        return DateTimeFormatter()
-    }
+    @Singleton
+    fun provideDateTimeFormatter(@ApplicationContext context: Context): DateTimeFormatter = DateTimeFormatter(context)
 
     @Provides
-    fun provideTimeDifferenceCalculator(): TimeDifferenceCalculator {
-        return TimeDifferenceCalculator()
-    }
-
-    @Provides
-    fun provideDateFormatter(): DateFormatter {
-        return DateFormatter()
-    }
-
+    @Singleton
+    fun provideTimeDifferenceCalculator(): TimeDifferenceCalculator = TimeDifferenceCalculator()
 }

@@ -13,16 +13,7 @@ import java.io.File
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val recorder by lazy {
-        AudioRecorderImpl(applicationContext)
-    }
     private val permissions = arrayOf(android.Manifest.permission.RECORD_AUDIO)
-    private val player by lazy {
-        AudioPlayerImpl(applicationContext)
-    }
-
-    var audioFile: File? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +23,7 @@ class MainActivity : ComponentActivity() {
             0
         )
 
-        val viewModel: VoiceRecordViewModel by viewModels()
+        //val viewModel: VoiceRecordViewModel by viewModels()
 
         setContent {
             VoiceRecorderScreen()

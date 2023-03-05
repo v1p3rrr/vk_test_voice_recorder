@@ -1,16 +1,23 @@
 package com.vpr.vk_test_voice_recorder.utils
 
+import android.content.Context
+import android.provider.Settings.Global.getString
+import com.vpr.vk_test_voice_recorder.R
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class DateTimeFormatter {
-    private val DATE_FORMAT = "dd.MM.yyyy"
-    private val TIME_FORMAT = "HH:mm"
-    private val TIME_WITH_SECONDS_FORMAT = "HH:mm:ss"
+private const val DATE_FORMAT = "dd.MM.yyyy"
+private const val TIME_HOURS_MINUTES_FORMAT = "HH:mm"
+private const val TIME_FORMAT = "HH:mm:ss"
+private const val TIME_MINUTES_SECONDS_FORMAT = "mm:ss"
+
+class DateTimeFormatter @Inject constructor(private val context: Context) {
 
     fun getDateTimePair(timestamp: Long): Pair<String, String> {
         val date = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(timestamp)
-        val time = SimpleDateFormat(TIME_FORMAT, Locale.getDefault()).format(timestamp)
+        val time = SimpleDateFormat(TIME_HOURS_MINUTES_FORMAT, Locale.getDefault()).format(timestamp)
         return date to time
     }
 
@@ -18,19 +25,20 @@ class DateTimeFormatter {
         return SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(timestamp)
     }
 
-    fun getTime(timestamp: Long): String {
-        return SimpleDateFormat(TIME_FORMAT, Locale.getDefault()).format(timestamp)
+    fun getHoursMinutesTime(timestamp: Long): String {
+        return SimpleDateFormat(TIME_HOURS_MINUTES_FORMAT, Locale.getDefault()).format(timestamp)
     }
-    
-    //todo fix +3 hrs
-    fun getTimeWithDaysAsHours(timestamp: Long): String {
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = timestamp
+
+    fun getDuration(timestamp: Long): String {
+        val hours = TimeUnit.MILLISECONDS.toHours(timestamp)
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(timestamp - TimeUnit.HOURS.toMillis(hours))
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(timestamp - TimeUnit.HOURS.toMillis(hours) - TimeUnit.MINUTES.toMillis(minutes))
+
+        return if (hours >= 1) {
+            String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format("%02d:%02d", minutes, seconds)
         }
-        val duration = calendar.timeInMillis - Calendar.getInstance().apply {
-            timeInMillis = 0
-        }.timeInMillis
-        return SimpleDateFormat(TIME_WITH_SECONDS_FORMAT, Locale.getDefault()).format(Date(duration))
     }
 
     fun formatDateDeicticDay(timestamp: Long): String {
@@ -40,8 +48,8 @@ class DateTimeFormatter {
         val date = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(timestamp)
 
         return when {
-            isToday(now, timestamp) -> "Сегодня"
-            isYesterday(now, timestamp) -> "Завтра" // todo add to resources
+            isToday(now, timestamp) -> context.getString(R.string.today)
+            isYesterday(now, timestamp) -> context.getString(R.string.yesterday)
             else -> date
         }
     }

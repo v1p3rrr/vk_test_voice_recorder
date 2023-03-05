@@ -9,7 +9,7 @@ import androidx.compose.material3.CardDefaults.cardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -17,15 +17,28 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.vpr.vk_test_voice_recorder.domain.model.VoiceRecord
 
 @Composable
 fun AudioRecordCard(
+    modifier: Modifier = Modifier,
+    viewModel: VoiceRecordViewModel,
     audioRecord: VoiceRecord,
-    onClickPlayPause: (Boolean) -> Unit
+    onClickPlay: (position: Int) -> Unit,
+    onClickPause: () -> Unit
 ) {
+    val currentPlayerPosition by viewModel.currentPlayerPosition.collectAsState(0)
+    var isPlaying by remember { mutableStateOf(false)}
+
+    LaunchedEffect(currentPlayerPosition) {
+        if (currentPlayerPosition == 0) {
+            isPlaying = false
+        }
+    }
+
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 8.dp, vertical = 4.dp),
         elevation = cardElevation(8.dp)
     ) {
@@ -47,7 +60,7 @@ fun AudioRecordCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 Row() {
                     Text(
-                        text = audioRecord.date,
+                        text = viewModel.dateTimeFormatter.formatDateDeicticDay(audioRecord.timestamp),
                         fontSize = 14.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -68,27 +81,30 @@ fun AudioRecordCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "00:19 / ",//audioRecord.currentTiming,
+                        text = viewModel.dateTimeFormatter.getDuration(currentPlayerPosition.toLong()),
                         fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = audioRecord.duration,
+                        text = "/ " + audioRecord.duration,
                         fontSize = 14.sp
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 IconButton(
                     onClick = {
-                        onClickPlayPause(
-                            false//!audioRecord.isPlaying
-                        )
+                        if (!isPlaying) {
+                            onClickPlay(currentPlayerPosition)
+                        } else {
+                            onClickPause()
+                        }
+                        isPlaying = !isPlaying
                     },
                     modifier = Modifier.size(56.dp)
                 ) {
                     Icon(
                         imageVector = if (
-                            true//audioRecord.isPlaying
+                            isPlaying
                         ) Icons.Filled.PauseCircle else Icons.Filled.PlayCircleFilled,
                         contentDescription = null,
                         modifier = Modifier.size(32.dp)
@@ -102,15 +118,17 @@ fun AudioRecordCard(
 @Preview
 @Composable
 fun PreviewAudioRecordCard() {
-    fun doNothing(): (Boolean) -> Unit = {}
     AudioRecordCard(
+        viewModel = hiltViewModel(),
         audioRecord = VoiceRecord(
             id = 1,
             filePath = "",
             name = "Поход к адвокату",
             duration = "123:12:23",
             date = "Сегодня",
-            time = "14:34"
-        ), onClickPlayPause = doNothing()
+            time = "14:34",
+            timestamp = 1686010860000
+        ), onClickPlay = {},
+        onClickPause = {}
     )
 }

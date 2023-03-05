@@ -32,8 +32,8 @@ class AudioRecorderImpl @Inject constructor(
     @Throws(IOException::class)
     private fun createAudioFile(): File {
         val timeStamp = SimpleDateFormat(DATETIME_FORMAT, Locale.getDefault()).format(Date())
-        val audioFileName = "AUDIO_$timeStamp.3gp"
-        val audioDir = context.getExternalFilesDir(null)
+        val audioFileName = "AUDIO_$timeStamp.mp3"
+        val audioDir = context.filesDir
         return File(audioDir, audioFileName)
     }
 
@@ -42,14 +42,17 @@ class AudioRecorderImpl @Inject constructor(
             audioFile = createAudioFile()
             createRecorder().apply {
                 setAudioSource(MediaRecorder.AudioSource.MIC)
-                setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-                setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
                 setOutputFile(audioFile?.absolutePath)
                 prepare()
                 start()
 
                 startTime = System.currentTimeMillis()
                 recorder = this
+
+                val amplitude = recorder!!.maxAmplitude
+                println(amplitude)
                 return true
             }
         } catch (e: IOException) {
@@ -60,6 +63,10 @@ class AudioRecorderImpl @Inject constructor(
 
     override fun stop() {
         recorder?.apply {
+                val amplitude = recorder!!.maxAmplitude
+                println(amplitude)
+                // delay for 100 milliseconds
+                Thread.sleep(100)
             stop()
             endTime = System.currentTimeMillis()
             reset()

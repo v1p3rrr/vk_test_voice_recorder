@@ -2,15 +2,16 @@ package com.vpr.vk_test_voice_recorder.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vpr.vk_test_voice_recorder.data.database.VoiceRecordEntity
+import com.vpr.vk_test_voice_recorder.data.di.IoDispatcher
 import com.vpr.vk_test_voice_recorder.domain.VoiceRecordRepository
 import com.vpr.vk_test_voice_recorder.domain.model.VoiceRecord
 import com.vpr.vk_test_voice_recorder.domain.player.AudioPlayer
+import com.vpr.vk_test_voice_recorder.domain.usecase.AudioDeletionUseCase
 import com.vpr.vk_test_voice_recorder.domain.usecase.AudioRecordingUseCase
-import com.vpr.vk_test_voice_recorder.utils.DateFormatter
+import com.vpr.vk_test_voice_recorder.domain.usecase.PlayAudioUseCase
 import com.vpr.vk_test_voice_recorder.utils.DateTimeFormatter
-import com.vpr.vk_test_voice_recorder.utils.TimeDifferenceCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -22,26 +23,32 @@ import javax.inject.Inject
 class VoiceRecordViewModel @Inject constructor(
     private val repository: VoiceRecordRepository,
     private val audioRecordingUseCase: AudioRecordingUseCase,
+    private val audioDeletionUseCase: AudioDeletionUseCase,
+    private val playAudioUseCase: PlayAudioUseCase,
     private val player: AudioPlayer,
-    private val dateTimeFormatter: DateTimeFormatter
+    val dateTimeFormatter: DateTimeFormatter,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) :
     ViewModel() {
 
+    val currentPlayerPosition = player.currentPlayerPosition
+
     private val _voiceRecords = MutableStateFlow<List<VoiceRecord>>(emptyList())
-    public val voiceRecords: StateFlow<List<VoiceRecord>> = _voiceRecords
+    val voiceRecords: StateFlow<List<VoiceRecord>> = _voiceRecords
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(ioDispatcher) {
             repository.allVoiceRecords
                 .map { voiceRecordList ->
                     voiceRecordList.map { voiceRecordEntity ->
                         VoiceRecord(
                             id = voiceRecordEntity.id,
                             name = voiceRecordEntity.name,
-                            duration = dateTimeFormatter.getTimeWithDaysAsHours(voiceRecordEntity.duration),
+                            duration = dateTimeFormatter.getDuration(voiceRecordEntity.duration),
                             filePath = voiceRecordEntity.filePath,
                             date = dateTimeFormatter.getDate(voiceRecordEntity.timestamp),
-                            time = dateTimeFormatter.getTime(voiceRecordEntity.timestamp)
+                            time = dateTimeFormatter.getHoursMinutesTime(voiceRecordEntity.timestamp),
+                            timestamp = voiceRecordEntity.timestamp
                         )
                     }
                 }
@@ -49,10 +56,6 @@ class VoiceRecordViewModel @Inject constructor(
                     _voiceRecords.value = mappedList
                 }
         }
-    }
-
-    fun insertVoiceRecord(voiceRecord: VoiceRecordEntity) = viewModelScope.launch {
-        repository.insert(voiceRecord)
     }
 
     suspend fun startRecorder() {
@@ -63,12 +66,33 @@ class VoiceRecordViewModel @Inject constructor(
         audioRecordingUseCase.stopRecordingAndSave()
     }
 
-    fun startPlayer(file: File) {
-        player.playFile(file)
+    fun deleteRecord(voiceRecord: VoiceRecord) {
+        viewModelScope.launch(ioDispatcher) {
+            if (playAudioUseCase.getCurrentRecord()?.id == voiceRecord.id){
+                playAudioUseCase.stopAudio()
+            }
+            audioDeletionUseCase.deleteRecording(voiceRecord)
+        }
+    }
+
+    fun startPlayer(voiceRecord: VoiceRecord, position: Int) {
+        viewModelScope.launch(ioDispatcher) {
+            playAudioUseCase.playAudio(voiceRecord, position)
+        }
+    }
+
+    fun pausePlayer() {
+        viewModelScope.launch(ioDispatcher) {
+            playAudioUseCase.pauseAudio()
+            //player.pause()
+        }
     }
 
     fun stopPlayer() {
-        player.stop()
+        viewModelScope.launch(ioDispatcher) {
+            playAudioUseCase.stopAudio()
+            //player.stop()
+        }
     }
 }
 
