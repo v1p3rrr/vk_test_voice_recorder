@@ -10,11 +10,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
+import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import java.io.File
 
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
@@ -25,6 +25,9 @@ fun VoiceRecorderScreen() {
     val viewModel: VoiceRecordViewModel = viewModel()
     var isRecording by remember { mutableStateOf(false) }
     val audioRecords by viewModel.voiceRecords.collectAsState(emptyList())
+    val playerState by viewModel.playerState.collectAsState()
+
+
     LaunchedEffect(key1 = isRecording) {
         if (isRecording) {
             viewModel.startRecorder()
@@ -41,7 +44,7 @@ fun VoiceRecorderScreen() {
                 },
                 content = {
                     Icon(
-                        if (isRecording) Icons.Filled.Mic else Icons.Filled.MicOff,
+                        if (isRecording) Icons.Filled.StopCircle else Icons.Filled.Mic,
                         contentDescription = if (isRecording) "Stop recording" else "Start recording"
                     )
                 }

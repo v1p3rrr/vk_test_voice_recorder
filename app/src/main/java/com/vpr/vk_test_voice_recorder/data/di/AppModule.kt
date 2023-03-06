@@ -47,7 +47,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideAudioPlayer(@ApplicationContext context: Context, @DefaultDispatcher dispatcher: CoroutineDispatcher): AudioPlayer = AudioPlayerImpl(context, dispatcher)
+    fun provideAudioPlayer(@DefaultDispatcher dispatcher: CoroutineDispatcher): AudioPlayer = AudioPlayerImpl(dispatcher)
 
     @Singleton
     @Provides

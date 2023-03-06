@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vpr.vk_test_voice_recorder.data.di.IoDispatcher
 import com.vpr.vk_test_voice_recorder.domain.VoiceRecordRepository
+import com.vpr.vk_test_voice_recorder.domain.model.PlayerState
 import com.vpr.vk_test_voice_recorder.domain.model.VoiceRecord
 import com.vpr.vk_test_voice_recorder.domain.player.AudioPlayer
 import com.vpr.vk_test_voice_recorder.domain.usecase.AudioDeletionUseCase
@@ -14,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
@@ -25,36 +27,37 @@ class VoiceRecordViewModel @Inject constructor(
     private val audioRecordingUseCase: AudioRecordingUseCase,
     private val audioDeletionUseCase: AudioDeletionUseCase,
     private val playAudioUseCase: PlayAudioUseCase,
-    private val player: AudioPlayer,
     val dateTimeFormatter: DateTimeFormatter,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) :
     ViewModel() {
 
-    val currentPlayerPosition = player.currentPlayerPosition
+    val playerState = playAudioUseCase.playerState
 
     private val _voiceRecords = MutableStateFlow<List<VoiceRecord>>(emptyList())
     val voiceRecords: StateFlow<List<VoiceRecord>> = _voiceRecords
 
     init {
         viewModelScope.launch(ioDispatcher) {
-            repository.allVoiceRecords
-                .map { voiceRecordList ->
-                    voiceRecordList.map { voiceRecordEntity ->
-                        VoiceRecord(
-                            id = voiceRecordEntity.id,
-                            name = voiceRecordEntity.name,
-                            duration = dateTimeFormatter.getDuration(voiceRecordEntity.duration),
-                            filePath = voiceRecordEntity.filePath,
-                            date = dateTimeFormatter.getDate(voiceRecordEntity.timestamp),
-                            time = dateTimeFormatter.getHoursMinutesTime(voiceRecordEntity.timestamp),
-                            timestamp = voiceRecordEntity.timestamp
-                        )
+            launch {
+                repository.allVoiceRecords
+                    .map { voiceRecordList ->
+                        voiceRecordList.map { voiceRecordEntity ->
+                            VoiceRecord(
+                                id = voiceRecordEntity.id,
+                                name = voiceRecordEntity.name,
+                                duration = dateTimeFormatter.getDuration(voiceRecordEntity.duration),
+                                filePath = voiceRecordEntity.filePath,
+                                date = dateTimeFormatter.getDate(voiceRecordEntity.timestamp),
+                                time = dateTimeFormatter.getHoursMinutesTime(voiceRecordEntity.timestamp),
+                                timestamp = voiceRecordEntity.timestamp
+                            )
+                        }
                     }
-                }
-                .collect { mappedList ->
-                    _voiceRecords.value = mappedList
-                }
+                    .collect { mappedList ->
+                        _voiceRecords.value = mappedList
+                    }
+            }
         }
     }
 

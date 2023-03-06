@@ -9,7 +9,9 @@ import androidx.compose.material3.CardDefaults.cardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -28,14 +30,7 @@ fun AudioRecordCard(
     onClickPlay: (position: Int) -> Unit,
     onClickPause: () -> Unit
 ) {
-    val currentPlayerPosition by viewModel.currentPlayerPosition.collectAsState(0)
-    var isPlaying by remember { mutableStateOf(false)}
-
-    LaunchedEffect(currentPlayerPosition) {
-        if (currentPlayerPosition == 0) {
-            isPlaying = false
-        }
-    }
+    val playerState by viewModel.playerState.collectAsState()
 
     Card(
         modifier = modifier
@@ -81,7 +76,7 @@ fun AudioRecordCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = viewModel.dateTimeFormatter.getDuration(currentPlayerPosition.toLong()),
+                        text = (if (playerState.voiceRecord==audioRecord) viewModel.dateTimeFormatter.getDuration(playerState.currentPlayerPosition.toLong()) else "00:00"),
                         fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -93,19 +88,20 @@ fun AudioRecordCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 IconButton(
                     onClick = {
-                        if (!isPlaying) {
-                            onClickPlay(currentPlayerPosition)
+                        if (!playerState.isPlaying || playerState.voiceRecord != audioRecord) {
+                            onClickPlay(playerState.currentPlayerPosition)
                         } else {
                             onClickPause()
                         }
-                        isPlaying = !isPlaying
                     },
                     modifier = Modifier.size(56.dp)
                 ) {
                     Icon(
-                        imageVector = if (
-                            isPlaying
-                        ) Icons.Filled.PauseCircle else Icons.Filled.PlayCircleFilled,
+                        imageVector = if (playerState.isPlaying && playerState.voiceRecord == audioRecord) {
+                            Icons.Filled.PauseCircle
+                        } else {
+                            Icons.Filled.PlayCircleFilled
+                        },
                         contentDescription = null,
                         modifier = Modifier.size(32.dp)
                     )

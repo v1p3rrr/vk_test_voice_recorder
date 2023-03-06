@@ -5,7 +5,8 @@ import java.io.File
 
 interface AudioPlayer {
     val currentPlayerPosition: StateFlow<Int>
+    val isPlaying: StateFlow<Boolean>
     fun playFile(file: File, position: Int?)
-    fun stop()
-    fun pause()
+    fun stopPlayer()
+    fun pausePlayer()
 }

@@ -11,7 +11,6 @@ import java.io.File
 import java.io.FileInputStream
 
 class AudioPlayerImpl(
-    private val context: Context,
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : AudioPlayer {
 
@@ -21,7 +20,7 @@ class AudioPlayerImpl(
     private val _currentPlayerPosition = MutableStateFlow<Int>(0)
     override val currentPlayerPosition: StateFlow<Int> = _currentPlayerPosition
     private val _isPlaying = MutableStateFlow(false)
-    val isPlaying: StateFlow<Boolean> = _isPlaying
+    override val isPlaying: StateFlow<Boolean> = _isPlaying
 
     override fun playFile(file: File, position: Int?) {
         try {
@@ -31,6 +30,7 @@ class AudioPlayerImpl(
                 prepare()
                 seekTo(position ?: playbackPosition)
                 start()
+                _currentPlayerPosition.value = position ?: playbackPosition
                 println("STARTED")
             }
             _isPlaying.value = true
@@ -41,7 +41,7 @@ class AudioPlayerImpl(
 
     }
 
-    override fun pause() {
+    override fun pausePlayer() {
         try {
             player?.apply {
                 if (this.isPlaying) {
@@ -53,48 +53,45 @@ class AudioPlayerImpl(
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            player = null
         } finally {
             progressJob?.cancel()
             progressJob = null
         }
     }
 
-    override fun stop() {
+    override fun stopPlayer() {
         player?.apply {
             stop()
             reset()
-            playbackPosition = 0
-            _currentPlayerPosition.value = 0
-            player = null
-            _isPlaying.value = false
-            progressJob?.cancel()
-            progressJob = null
         }
+        playbackPosition = 0
+        _currentPlayerPosition.value = 0
+        player = null
+        _isPlaying.value = false
+        progressJob?.cancel()
+        progressJob = null
+        println("STOPPED-")
     }
 
     private fun updateProgress() = CoroutineScope(defaultDispatcher).launch {
         player?.apply {
-            while (true) {
-                player?.let { player ->
-                    if (_isPlaying.value) {
-                        _currentPlayerPosition.value = player.currentPosition
-                        println("currentPlayerPosition.value: " + _currentPlayerPosition.value)
-                    }
-                    if (player.currentPosition == player.duration) {
-                        stop()
-                        println("STOPPED")
-                        _currentPlayerPosition.value = 0
-                        progressJob?.cancel()
-                        progressJob = null
-                        return@launch
-                    }
-                } ?: run {
-                    _currentPlayerPosition.value = 0
+            while (isActive && currentPosition < duration) {
+                if (_isPlaying.value) {
+                    _currentPlayerPosition.value = currentPosition
+                    println("currentPlayerPosition.value: " + _currentPlayerPosition.value)
+                    println("currentPosition: $currentPosition")
+                    println(duration)
+                }
+                delay(20L)
+                if (!isPlaying || currentPosition >= duration) {
+                    _currentPlayerPosition.value = duration
+                    delay(20L)
+                    stopPlayer()
+                    println("AUDIO ENDED, STOPPED")
                     progressJob?.cancel()
                     progressJob = null
-                    return@launch
                 }
-                delay(100L)
             }
         }
     }
