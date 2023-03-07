@@ -1,4 +1,4 @@
-package com.vpr.vk_test_voice_recorder.domain.usecase
+package com.vpr.vk_test_voice_recorder.domain.usecase.audio
 
 import com.vpr.vk_test_voice_recorder.data.di.DefaultDispatcher
 import com.vpr.vk_test_voice_recorder.domain.model.PlayerState
@@ -27,13 +27,11 @@ class PlayAudioUseCase @Inject constructor(
 
     init {
         CoroutineScope(defaultDispatcher).launch {
-            println("Collecting isPlaying flow")
             launch {
                 player.isPlaying.collect {
                     _playerState.value = _playerState.value.copy(isPlaying = it)
                 }
             }
-            println("Collecting currentPlayerPosition flow")
             launch {
                 player.currentPlayerPosition.collect {
                     _playerState.value = _playerState.value.copy(currentPlayerPosition = it)
@@ -55,8 +53,6 @@ class PlayAudioUseCase @Inject constructor(
             val filePath = voiceRecord.filePath
             val file = File(filePath)
             if (file.exists()) {
-                println(filePath)
-                println(file.exists())
                 player.playFile(file, actualPosition)
                 return true
             }

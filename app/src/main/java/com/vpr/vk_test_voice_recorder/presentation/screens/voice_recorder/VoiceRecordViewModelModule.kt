@@ -1,14 +1,14 @@
-package com.vpr.vk_test_voice_recorder.presentation
+package com.vpr.vk_test_voice_recorder.presentation.screens.voice_recorder
 
-import com.vpr.vk_test_voice_recorder.data.di.DefaultDispatcher
 import com.vpr.vk_test_voice_recorder.data.di.IoDispatcher
-import com.vpr.vk_test_voice_recorder.domain.VoiceRecordRepository
+import com.vpr.vk_test_voice_recorder.domain.repository.VoiceRecordRepository
 import com.vpr.vk_test_voice_recorder.domain.player.AudioPlayer
-import com.vpr.vk_test_voice_recorder.domain.recorder.AudioRecorder
-import com.vpr.vk_test_voice_recorder.domain.saver.FileManager
-import com.vpr.vk_test_voice_recorder.domain.usecase.AudioDeletionUseCase
-import com.vpr.vk_test_voice_recorder.domain.usecase.AudioRecordingUseCase
-import com.vpr.vk_test_voice_recorder.domain.usecase.PlayAudioUseCase
+import com.vpr.vk_test_voice_recorder.domain.player.AudioRecorder
+import com.vpr.vk_test_voice_recorder.domain.player.FileManager
+import com.vpr.vk_test_voice_recorder.domain.usecase.audio.AudioDeletionUseCase
+import com.vpr.vk_test_voice_recorder.domain.usecase.audio.AudioRecordingUseCase
+import com.vpr.vk_test_voice_recorder.domain.usecase.audio.AudioRenameUseCase
+import com.vpr.vk_test_voice_recorder.domain.usecase.audio.PlayAudioUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,4 +28,6 @@ object VoiceRecordViewModelModule {
     @Provides
     fun providePlayAudioUseCase(player: AudioPlayer, @IoDispatcher dispatcher: CoroutineDispatcher): PlayAudioUseCase = PlayAudioUseCase(player, dispatcher)
 
+    @Provides
+    fun provideAudioRenameUseCase(fileManager: FileManager, repository: VoiceRecordRepository): AudioRenameUseCase = AudioRenameUseCase(fileManager, repository)
 }

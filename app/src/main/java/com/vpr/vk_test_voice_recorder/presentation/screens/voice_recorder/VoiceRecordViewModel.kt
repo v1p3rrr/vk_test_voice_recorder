@@ -1,24 +1,22 @@
-package com.vpr.vk_test_voice_recorder.presentation
+package com.vpr.vk_test_voice_recorder.presentation.screens.voice_recorder
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vpr.vk_test_voice_recorder.data.di.IoDispatcher
-import com.vpr.vk_test_voice_recorder.domain.VoiceRecordRepository
-import com.vpr.vk_test_voice_recorder.domain.model.PlayerState
+import com.vpr.vk_test_voice_recorder.data.di.MainDispatcher
+import com.vpr.vk_test_voice_recorder.domain.repository.VoiceRecordRepository
 import com.vpr.vk_test_voice_recorder.domain.model.VoiceRecord
-import com.vpr.vk_test_voice_recorder.domain.player.AudioPlayer
-import com.vpr.vk_test_voice_recorder.domain.usecase.AudioDeletionUseCase
-import com.vpr.vk_test_voice_recorder.domain.usecase.AudioRecordingUseCase
-import com.vpr.vk_test_voice_recorder.domain.usecase.PlayAudioUseCase
+import com.vpr.vk_test_voice_recorder.domain.usecase.audio.AudioDeletionUseCase
+import com.vpr.vk_test_voice_recorder.domain.usecase.audio.AudioRecordingUseCase
+import com.vpr.vk_test_voice_recorder.domain.usecase.audio.AudioRenameUseCase
+import com.vpr.vk_test_voice_recorder.domain.usecase.audio.PlayAudioUseCase
+import com.vpr.vk_test_voice_recorder.presentation.ActionStatus
 import com.vpr.vk_test_voice_recorder.utils.DateTimeFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.File
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,9 +24,11 @@ class VoiceRecordViewModel @Inject constructor(
     private val repository: VoiceRecordRepository,
     private val audioRecordingUseCase: AudioRecordingUseCase,
     private val audioDeletionUseCase: AudioDeletionUseCase,
+    private val audioRenameUseCase: AudioRenameUseCase,
     private val playAudioUseCase: PlayAudioUseCase,
     val dateTimeFormatter: DateTimeFormatter,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    @MainDispatcher private val mainDispatcher: CoroutineDispatcher
 ) :
     ViewModel() {
 
@@ -36,6 +36,9 @@ class VoiceRecordViewModel @Inject constructor(
 
     private val _voiceRecords = MutableStateFlow<List<VoiceRecord>>(emptyList())
     val voiceRecords: StateFlow<List<VoiceRecord>> = _voiceRecords
+
+    private val _statusMessageSharedFlow = MutableSharedFlow<ActionStatus>()
+    val statusMessageSharedFlow = _statusMessageSharedFlow.asSharedFlow()
 
     init {
         viewModelScope.launch(ioDispatcher) {
@@ -74,7 +77,20 @@ class VoiceRecordViewModel @Inject constructor(
             if (playAudioUseCase.getCurrentRecord()?.id == voiceRecord.id){
                 playAudioUseCase.stopAudio()
             }
-            audioDeletionUseCase.deleteRecording(voiceRecord)
+            val isSuccessful = audioDeletionUseCase.deleteRecording(voiceRecord)
+            _statusMessageSharedFlow.emit(if (isSuccessful) ActionStatus.DELETE_SUCCESS else ActionStatus.DELETE_FAILED)
+        }
+    }
+
+    fun renameRecord(voiceRecord: VoiceRecord?, newName: String){
+        viewModelScope.launch(ioDispatcher) {
+            var isSuccessful = false
+            if (voiceRecord != null){
+                isSuccessful = audioRenameUseCase.rename(voiceRecord, newName)
+            }
+            _statusMessageSharedFlow.emit(
+                if (isSuccessful) ActionStatus.RENAME_SUCCESS else
+                    ActionStatus.RENAME_FAILED)
         }
     }
 
@@ -87,14 +103,12 @@ class VoiceRecordViewModel @Inject constructor(
     fun pausePlayer() {
         viewModelScope.launch(ioDispatcher) {
             playAudioUseCase.pauseAudio()
-            //player.pause()
         }
     }
 
     fun stopPlayer() {
         viewModelScope.launch(ioDispatcher) {
             playAudioUseCase.stopAudio()
-            //player.stop()
         }
     }
 }

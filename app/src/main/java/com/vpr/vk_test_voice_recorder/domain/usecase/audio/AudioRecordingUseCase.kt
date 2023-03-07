@@ -1,9 +1,9 @@
-package com.vpr.vk_test_voice_recorder.domain.usecase
+package com.vpr.vk_test_voice_recorder.domain.usecase.audio
 
 import com.vpr.vk_test_voice_recorder.data.database.VoiceRecordEntity
-import com.vpr.vk_test_voice_recorder.domain.VoiceRecordRepository
-import com.vpr.vk_test_voice_recorder.domain.recorder.AudioRecorder
-import com.vpr.vk_test_voice_recorder.domain.saver.FileManager
+import com.vpr.vk_test_voice_recorder.domain.repository.VoiceRecordRepository
+import com.vpr.vk_test_voice_recorder.domain.player.AudioRecorder
+import com.vpr.vk_test_voice_recorder.domain.player.FileManager
 import javax.inject.Inject
 import javax.inject.Singleton
 

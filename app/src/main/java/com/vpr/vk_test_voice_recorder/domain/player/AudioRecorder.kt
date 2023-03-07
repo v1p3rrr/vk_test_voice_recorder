@@ -1,4 +1,4 @@
-package com.vpr.vk_test_voice_recorder.domain.recorder
+package com.vpr.vk_test_voice_recorder.domain.player
 
 import java.io.File
 

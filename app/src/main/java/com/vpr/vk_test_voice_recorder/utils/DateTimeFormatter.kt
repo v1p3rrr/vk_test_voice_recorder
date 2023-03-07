@@ -30,9 +30,15 @@ class DateTimeFormatter @Inject constructor(private val context: Context) {
     }
 
     fun getDuration(timestamp: Long): String {
-        val hours = TimeUnit.MILLISECONDS.toHours(timestamp)
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(timestamp - TimeUnit.HOURS.toMillis(hours))
-        val seconds = TimeUnit.MILLISECONDS.toSeconds(timestamp - TimeUnit.HOURS.toMillis(hours) - TimeUnit.MINUTES.toMillis(minutes))
+        var hours = TimeUnit.MILLISECONDS.toHours(timestamp)
+        var minutes = TimeUnit.MILLISECONDS.toMinutes(timestamp - TimeUnit.HOURS.toMillis(hours))
+        var seconds = TimeUnit.MILLISECONDS.toSeconds(timestamp - TimeUnit.HOURS.toMillis(hours) - TimeUnit.MINUTES.toMillis(minutes))
+
+        if (timestamp <= 0){
+            hours = 0
+            minutes = 0
+            seconds = 0
+        }
 
         return if (hours >= 1) {
             String.format("%02d:%02d:%02d", hours, minutes, seconds)

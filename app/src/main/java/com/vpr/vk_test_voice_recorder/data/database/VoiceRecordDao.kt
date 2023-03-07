@@ -17,6 +17,6 @@ interface VoiceRecordDao {
     @Query("DELETE FROM voice_records WHERE id = :id")
     fun deleteVoiceRecordById(id: Long)
 
-    @Query("UPDATE voice_records SET name = :newName WHERE id = :id")
-    fun updateVoiceRecordNameById(id: Long, newName: String)
+    @Query("UPDATE voice_records SET name = :newName, filePath = :filePath WHERE id = :id")
+    fun updateVoiceRecordNameAndFilePathById(id: Long, newName: String, filePath: String)
 }

@@ -2,7 +2,7 @@ package com.vpr.vk_test_voice_recorder.data.repository
 
 import com.vpr.vk_test_voice_recorder.data.database.VoiceRecordEntity
 import com.vpr.vk_test_voice_recorder.data.database.VoiceRecordDao
-import com.vpr.vk_test_voice_recorder.domain.VoiceRecordRepository
+import com.vpr.vk_test_voice_recorder.domain.repository.VoiceRecordRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,7 +22,7 @@ class VoiceRecordRepositoryImpl @Inject constructor(
         dao.deleteVoiceRecordById(voiceRecordId)
     }
 
-    override suspend fun updateName(id: Long, newName: String) {
-        dao.updateVoiceRecordNameById(id, newName)
+    override suspend fun updateNameAndFilePath(id: Long, newName: String, filePath: String) {
+        dao.updateVoiceRecordNameAndFilePathById(id = id, newName = newName, filePath = filePath)
     }
 }

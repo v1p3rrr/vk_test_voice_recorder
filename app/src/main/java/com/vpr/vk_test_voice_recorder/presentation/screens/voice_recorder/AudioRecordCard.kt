@@ -1,9 +1,13 @@
-package com.vpr.vk_test_voice_recorder.presentation
+package com.vpr.vk_test_voice_recorder.presentation.screens.voice_recorder
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircleFilled
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardElevation
 import androidx.compose.material3.Icon
@@ -12,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -22,11 +27,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vpr.vk_test_voice_recorder.domain.model.VoiceRecord
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AudioRecordCard(
     modifier: Modifier = Modifier,
     viewModel: VoiceRecordViewModel,
     audioRecord: VoiceRecord,
+    onLongClick: () -> Unit,
     onClickPlay: (position: Int) -> Unit,
     onClickPause: () -> Unit
 ) {
@@ -34,7 +41,15 @@ fun AudioRecordCard(
 
     Card(
         modifier = modifier
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .combinedClickable(
+                indication = rememberRipple(
+                    bounded = true,
+                ),
+                interactionSource = remember { MutableInteractionSource() },
+                onLongClick = onLongClick,
+                onClick = {}
+            ),
         elevation = cardElevation(8.dp)
     ) {
         Row(
@@ -76,7 +91,9 @@ fun AudioRecordCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = (if (playerState.voiceRecord==audioRecord) viewModel.dateTimeFormatter.getDuration(playerState.currentPlayerPosition.toLong()) else "00:00"),
+                        text = (if (playerState.voiceRecord == audioRecord && playerState.currentPlayerPosition >= 0)
+                            viewModel.dateTimeFormatter.getDuration(playerState.currentPlayerPosition.toLong())
+                        else "00:00"),
                         fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -124,7 +141,9 @@ fun PreviewAudioRecordCard() {
             date = "Сегодня",
             time = "14:34",
             timestamp = 1686010860000
-        ), onClickPlay = {},
+        ),
+        onLongClick = {},
+        onClickPlay = {},
         onClickPause = {}
     )
 }

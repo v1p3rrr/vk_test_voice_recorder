@@ -3,4 +3,15 @@
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="yesterday">Yesterday</string>
+    <string name="rename">Rename</string>
+    <string name="delete">Delete</string>
+    <string name="submit">Submit</string>
+    <string name="cancel">Cancel</string>
+    <string name="edit_record_name">Edit record name</string>
+    <string name="successful_rename">Successful rename</string>
+    <string name="rename_failed">Rename failed</string>
+    <string name="successful_deletion">Successful deletion</string>
+    <string name="deletion_failed">Deletion failed</string>
+    <string name="successful_creation">Successful creation</string>
+    <string name="creation_failed">Creation failed</string>
 </resources>

@@ -3,7 +3,7 @@ package com.vpr.vk_test_voice_recorder.data.recorder
 import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
-import com.vpr.vk_test_voice_recorder.domain.recorder.AudioRecorder
+import com.vpr.vk_test_voice_recorder.domain.player.AudioRecorder
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -50,9 +50,6 @@ class AudioRecorderImpl @Inject constructor(
 
                 startTime = System.currentTimeMillis()
                 recorder = this
-
-                val amplitude = recorder!!.maxAmplitude
-                println(amplitude)
                 return true
             }
         } catch (e: IOException) {
@@ -63,10 +60,10 @@ class AudioRecorderImpl @Inject constructor(
 
     override fun stop() {
         recorder?.apply {
-                val amplitude = recorder!!.maxAmplitude
+                val amplitude = recorder?.maxAmplitude
                 println(amplitude)
-                // delay for 100 milliseconds
-                Thread.sleep(100)
+                // delay for 50 milliseconds
+                Thread.sleep(50)
             stop()
             endTime = System.currentTimeMillis()
             reset()

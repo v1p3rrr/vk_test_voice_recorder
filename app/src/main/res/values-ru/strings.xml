@@ -4,4 +4,15 @@
     <string name="today">Сегодня</string>
     <string name="tomorrow">Завтра</string>
     <string name="yesterday">Вчера</string>
+    <string name="rename">Переименовать</string>
+    <string name="delete">Удалить</string>
+    <string name="submit">Подтвердить</string>
+    <string name="cancel">Отменить</string>
+    <string name="edit_record_name">Изменить название записи</string>
+    <string name="successful_rename">Успешно переименовано</string>
+    <string name="rename_failed">Не удалось переименовать</string>
+    <string name="successful_deletion">Успешно удалено</string>
+    <string name="deletion_failed">Не удалось удалить</string>
+    <string name="successful_creation">Успешно создано</string>
+    <string name="creation_failed">Не удалось создать</string>
 </resources>

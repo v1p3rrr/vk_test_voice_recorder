@@ -24,6 +24,7 @@ class AudioPlayerImpl(
 
     override fun playFile(file: File, position: Int?) {
         try {
+            println(file)
             val fileDescriptor = FileInputStream(file).fd
             player = MediaPlayer().apply {
                 setDataSource(fileDescriptor)
@@ -79,9 +80,7 @@ class AudioPlayerImpl(
             while (isActive && currentPosition < duration) {
                 if (_isPlaying.value) {
                     _currentPlayerPosition.value = currentPosition
-                    println("currentPlayerPosition.value: " + _currentPlayerPosition.value)
-                    println("currentPosition: $currentPosition")
-                    println(duration)
+                    println(currentPosition)
                 }
                 delay(20L)
                 if (!isPlaying || currentPosition >= duration) {

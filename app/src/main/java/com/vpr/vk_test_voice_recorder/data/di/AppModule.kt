@@ -8,10 +8,10 @@ import com.vpr.vk_test_voice_recorder.data.recorder.FileManagerImpl
 import com.vpr.vk_test_voice_recorder.data.recorder.AudioPlayerImpl
 import com.vpr.vk_test_voice_recorder.data.recorder.AudioRecorderImpl
 import com.vpr.vk_test_voice_recorder.data.repository.VoiceRecordRepositoryImpl
-import com.vpr.vk_test_voice_recorder.domain.VoiceRecordRepository
+import com.vpr.vk_test_voice_recorder.domain.repository.VoiceRecordRepository
 import com.vpr.vk_test_voice_recorder.domain.player.AudioPlayer
-import com.vpr.vk_test_voice_recorder.domain.recorder.AudioRecorder
-import com.vpr.vk_test_voice_recorder.domain.saver.FileManager
+import com.vpr.vk_test_voice_recorder.domain.player.AudioRecorder
+import com.vpr.vk_test_voice_recorder.domain.player.FileManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

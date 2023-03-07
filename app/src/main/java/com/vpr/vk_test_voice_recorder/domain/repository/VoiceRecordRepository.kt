@@ -1,4 +1,4 @@
-package com.vpr.vk_test_voice_recorder.domain
+package com.vpr.vk_test_voice_recorder.domain.repository
 
 import com.vpr.vk_test_voice_recorder.data.database.VoiceRecordEntity
 import kotlinx.coroutines.flow.Flow
@@ -10,5 +10,5 @@ interface VoiceRecordRepository {
 
     suspend fun delete(voiceRecordId: Long)
 
-    suspend fun updateName(id: Long, newName: String)
+    suspend fun updateNameAndFilePath(id: Long, newName: String, filePath: String)
 }
